@@ -1426,12 +1426,62 @@ if(installBtn){
 }
 </script>
 
-<!-- Script: ChatBot BotsPG -->
+<!-- Script: ChatBot BotsPG (bot propio de PG del Campo, sin IA externa) -->
 <script>
-window.WEB_APP_URL=window.WEB_APP_URL||"https://pg-del-campo-agente.onrender.com/chat-web";
+// URL del bot: la que esté en Firebase (config/empresa/chatbotUrl) o esta por defecto.
+window.WEB_APP_URL=window.WEB_APP_URL||"https://pg-del-campo-bot.onrender.com/chat-web";
+
+// ------------------- Sesión del visitante (para el panel-chat) -------------------
+// Cada navegador recibe un ID anónimo estable para que la conversación aparezca
+// en el panel y una persona del negocio pueda contestar por aquí mismo.
+(function(){
+  try{
+    var k="pg_sesion_chat";
+    if(!localStorage.getItem(k)){ localStorage.setItem(k,"v"+Date.now().toString(36)+Math.random().toString(36).slice(2,8)); }
+    window.PG_SESION=localStorage.getItem(k);
+  }catch(e){ window.PG_SESION="v"+Math.random().toString(36).slice(2,10); }
+})();
+
+// Última marca de tiempo recibida del bot (para pedir solo lo nuevo).
+window.PG_CHAT_TS=0;
+
+// Escapa el texto del cliente antes de pintarlo en pantalla.
+function pgEsc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+// Convierte *negrita* y saltos de línea del bot en HTML seguro.
+function pgFormato(s){
+  return pgEsc(s).replace(/\*([^*]+)\*/g,"<b>$1</b>").replace(/\n/g,"<br>");
+}
+
+// Mensajes que manda una PERSONA del negocio desde el panel (polling ligero).
+window.PG_pollPanel=function(){
+  try{
+    var base=String(window.WEB_APP_URL||"").replace(/\/chat-web.*$/,"");
+    if(!base||!window.PG_SESION) return;
+    var x=new XMLHttpRequest();
+    x.open("GET",base+"/chat-poll?sesion="+encodeURIComponent(window.PG_SESION)+"&after="+(window.PG_CHAT_TS||0),true);
+    x.onload=function(){
+      try{
+        var d=JSON.parse(x.responseText)||{};
+        var h=document.getElementById("historial");
+        (d.mensajes||[]).forEach(function(m){
+          if(h){ h.innerHTML+='<div class="mensaje ia">'+pgFormato(m.texto)+'</div>'; h.scrollTop=h.scrollHeight; }
+          if(m.ts&&m.ts>window.PG_CHAT_TS) window.PG_CHAT_TS=m.ts;
+        });
+      }catch(e){}
+    };
+    x.send();
+  }catch(e){}
+};
+
 function toggleChatBot(){
   var win=document.getElementById('chatbot-window');
   win.style.display=(win.style.display==='flex')?'none':'flex';
+  if(win.style.display==='flex'){ window.PG_pollPanel(); }
 }
 window.toggleChatBot=toggleChatBot;
 
@@ -1441,13 +1491,13 @@ async function enviarMensaje(){
   var btn=document.getElementById("btn-enviar");
   var mensaje=input.value.trim();
   if(!mensaje) return;
-  historial.innerHTML+='<div class="mensaje usuario">'+mensaje+'</div>';
+  historial.innerHTML+='<div class="mensaje usuario">'+pgEsc(mensaje)+'</div>';
   input.value="";
   historial.scrollTop=historial.scrollHeight;
   btn.disabled=true;
   var msgCarga=document.createElement("div");
   msgCarga.className="mensaje ia";
-  msgCarga.innerHTML="<i>Analizando solicitud central...</i>";
+  msgCarga.innerHTML="<i>Escribiendo…</i>";
   historial.appendChild(msgCarga);
   historial.scrollTop=historial.scrollHeight;
   try{
@@ -1455,16 +1505,24 @@ async function enviarMensaje(){
     var response=await fetch(window.WEB_APP_URL,{
       method:"POST",
       headers:{"Content-Type":"text/plain"},
-      body:JSON.stringify({mensaje:mensaje,contexto:contexto})
+      body:JSON.stringify({mensaje:mensaje,contexto:contexto,sesion:window.PG_SESION})
     });
     var datos=await response.json();
     if(datos&&datos.respuesta){
-      msgCarga.innerHTML=datos.respuesta;
+      msgCarga.innerHTML=pgFormato(datos.respuesta);
+      if(datos.modo==='humano'){
+        var aviso=document.createElement("div");
+        aviso.className="mensaje ia";
+        aviso.innerHTML="<i>👤 Una persona del equipo te va a responder por aquí mismo.</i>";
+        historial.appendChild(aviso);
+      }
+    }else if(datos&&datos.modo==='humano'){
+      msgCarga.innerHTML="<i>👤 Una persona del equipo te está atendiendo por aquí…</i>";
     }else{
       msgCarga.innerHTML="Disculpa, tuvimos un inconveniente al procesar la respuesta. Por favor, intenta de nuevo.";
     }
   }catch(error){
-    msgCarga.innerHTML="<b>Aviso de conexi\u00f3n:</b> No se logr\u00f3 enlazar con el puente de Jinotepe. Por favor verifica la publicaci\u00f3n.";
+    msgCarga.innerHTML="<b>Aviso de conexión:</b> No se logró enlazar con el asistente. Por favor verifica la publicación.";
   }
   btn.disabled=false;
   historial.scrollTop=historial.scrollHeight;
@@ -1475,6 +1533,12 @@ function evaluarTecla(e){
   if(e.key==='Enter') enviarMensaje();
 }
 window.evaluarTecla=evaluarTecla;
+
+// Revisa cada 8 segundos si una persona del negocio respondió (solo con el chat abierto).
+setInterval(function(){
+  var w=document.getElementById('chatbot-window');
+  if(w&&w.style.display==='flex'){ window.PG_pollPanel(); }
+},8000);
 </script>
 
 <!-- Script: Firebase + Lógica de negocio -->
