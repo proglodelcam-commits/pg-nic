@@ -1436,7 +1436,7 @@ if(installBtn){
 <!-- Script: ChatBot BotsPG (bot propio de PG del Campo, sin IA externa) -->
 <script>
 // URL del bot: la que esté en Firebase (config/empresa/chatbotUrl) o esta por defecto.
-window.WEB_APP_URL=window.WEB_APP_URL||"https://pg-del-campo-bot.onrender.com/chat-web";
+window.WEB_APP_URL=window.WEB_APP_URL||"https://pg-del-campo-agente.onrender.com/chat-web";
 
 // ------------------- Sesión del visitante (para el panel-chat) -------------------
 // Cada navegador recibe un ID anónimo estable para que la conversación aparezca
@@ -1660,7 +1660,7 @@ function startSync(){
   onValue(ref(db,'productos'),s=>{productos=s.val()||{};window.__pgProductos=productos;render()});
   /* Por seguridad NO se suscribe a todo el nodo 'clientes' (datos privados de todos). Se consulta por telefono bajo demanda en cliente() y saveTransaction(). */
   onValue(ref(db,'anuncios'),s=>{renderCarrusel(s.val()||{})});
-  onValue(ref(db,'config/empresa'),s=>{var e=s.val()||{};window.__pgEmpresa=e;if(e.chatbotUrl&&/^https?:\/\//i.test(e.chatbotUrl))window.WEB_APP_URL=e.chatbotUrl;renderHorario(e);renderEmpresa(e)});
+  onValue(ref(db,'config/empresa'),s=>{var e=s.val()||{};window.__pgEmpresa=e;if(e.chatbotUrl&&/^https?:\/\//i.test(e.chatbotUrl)&&!/pg-del-campo-bot\.onrender\.com/i.test(e.chatbotUrl))window.WEB_APP_URL=e.chatbotUrl; else if(e.chatbotUrl)window.WEB_APP_URL='https://pg-del-campo-agente.onrender.com/chat-web';renderHorario(e);renderEmpresa(e)});
   /* Siembra automática del catálogo si la nube está vacía */
   get(ref(db,'productos')).then(s=>{ if(!s.exists()||!Object.keys(s.val()||{}).length){ set(ref(db,'productos'),SEED_PRODUCTOS); } }).catch(()=>{});
 }
