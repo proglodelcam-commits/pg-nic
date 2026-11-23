@@ -1965,7 +1965,8 @@ async function nextReceipt(){
 async function saveTransaction(num){
   let t=totals(),
       tel=$('cliente-tel').value.trim(),
-      name=$('cliente-nombre').value.trim()||'Cliente General';
+      name=$('cliente-nombre').value.trim()||'Cliente General',
+      dirCli=$('cliente-dir').value.trim()||'Retiro en Sucursal';
   if(!tel)throw Error('Falta el c\u00f3digo de cliente (WhatsApp).');
   let id=(t.modo==='credito'?'credito_':'contado_')+Date.now(),
       now=new Date().toISOString(),
@@ -1986,7 +1987,7 @@ async function saveTransaction(num){
     tipo:t.modo==='credito'?'Venta a cr\u00e9dito':'Venta al contado',
     estado:status,subtotal:t.sub,porcentaje_descuento:t.p,
     monto_descuento:t.d,descuento_lealtad:t.leal,porcentaje_lealtad:t.lealP,
-    envio:t.ship,total:t.total,
+    envio:t.ship,total:t.total,direccion:dirCli,
     monto_pagado:paid,saldo_pendiente:t.modo==='credito'?t.total:0,
     metodo_pago:t.modo==='contado'?t.metodo:'N/A',items,
     estrella:'pendiente',estrella_monto:(+t.total||0),
@@ -1997,7 +1998,7 @@ async function saveTransaction(num){
     numero_recibo:num,tipo:t.modo,estado:status,
     items:Object.fromEntries(carrito.map(function(i){return[i.id,i.q]})),
     monto_revertir:t.total,subtotal:t.sub,descuento:t.d,descuento_lealtad:t.leal,
-    envio:t.ship,total:t.total,
+    envio:t.ship,total:t.total,direccion:dirCli,
     monto_pagado:paid,saldo_pendiente:t.modo==='credito'?t.total:0,
     metodo_pago:t.modo==='contado'?t.metodo:'N/A'
   };
@@ -2006,7 +2007,7 @@ async function saveTransaction(num){
     tipo:t.modo==='credito'?'Venta a cr\u00e9dito':'Venta al contado',
     monto:t.total,monto_pagado:paid,
     saldo_pendiente:t.modo==='credito'?t.total:0,
-    estado:status,numero_recibo:num,
+    estado:status,numero_recibo:num,direccion:dirCli,
     metodo_pago:t.modo==='contado'?t.metodo:'N/A'
   };
   if(t.modo==='credito'){
