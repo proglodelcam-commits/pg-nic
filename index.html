@@ -1647,9 +1647,50 @@ window.pgContextoTienda=function(){
   }catch(err){ return ''; }
 };
 
+/* Carrito recibido desde el enlace del asistente: se aplica una sola vez,
+   después de recibir el catálogo, sin crear ni confirmar pedidos. */
+let pgCarritoEnlaceAplicado=false;
+function pgCargarCarritoDesdeEnlace(){
+  if(pgCarritoEnlaceAplicado)return;
+  const params=new URLSearchParams(window.location.search);
+  const raw=params.get('items');
+  if(raw===null)return;
+  pgCarritoEnlaceAplicado=true;
+  const pedidos=new Map(),avisos=[];
+  const partes=raw.split(',');
+  if(raw.length>12000||partes.length>100){avisos.push('El enlace contiene demasiados productos.');}
+  else partes.forEach(function(parte){
+    const m=parte.trim().match(/^([A-Za-z0-9_-]{1,128}):([1-9][0-9]{0,3})$/);
+    if(!m){avisos.push('Hay un producto o cantidad no válida en el enlace.');return;}
+    const q=Number(m[2]),total=(pedidos.get(m[1])||0)+q;
+    if(total>9999){avisos.push('La cantidad solicitada es demasiado grande.');return;}
+    pedidos.set(m[1],total);
+  });
+  let cargados=0;
+  pedidos.forEach(function(q,id){
+    const p=productos[id];
+    if(!p||p.visible===false){avisos.push('Un producto del enlace ya no está disponible.');return;}
+    const stock=Math.floor(Number(p.stock)||0),precio=Number(p.precio);
+    if(!Number.isFinite(precio)||precio<0){avisos.push('Un producto no tiene un precio válido.');return;}
+    if(stock<q){avisos.push((p.nombre||'Producto')+': solicitaste '+q+' y hay '+Math.max(0,stock)+' disponibles. No se agregó.');return;}
+    const x=carrito.find(function(i){return i.id===id;});
+    if(x){x.q=q;x.n=p.nombre||'Producto';x.price=precio;}
+    else carrito.push({id:id,n:p.nombre||'Producto',price:precio,q:q});
+    cargados+=q;
+  });
+  calc();
+  if(typeof window.navegarA==='function')window.navegarA('pedido');
+  const seccion=document.getElementById('pedido');
+  if(seccion){
+    let aviso=document.getElementById('pg-cart-link-status');
+    if(!aviso){aviso=document.createElement('p');aviso.id='pg-cart-link-status';aviso.setAttribute('role','status');aviso.style.cssText='padding:12px;margin:12px 0;border:1px solid #c8963e;border-radius:12px;background:#fff8e8;color:#1b382b;font-size:14px;line-height:1.5';seccion.insertBefore(aviso,seccion.firstChild);}
+    aviso.textContent=(cargados?'Carrito cargado con '+cargados+' unidades. Revisá los productos, completá tus datos y confirmá por WhatsApp.':'No se pudo cargar el carrito desde este enlace. Elegí tus productos en el catálogo.')+(avisos.length?' '+avisos.join(' '):'');
+  }
+}
+
 /* ── Listeners de Firebase (tiempo real) ── */
 function startSync(){
-  onValue(ref(db,'productos'),s=>{productos=s.val()||{};window.__pgProductos=productos;render()});
+  onValue(ref(db,'productos'),s=>{productos=s.val()||{};window.__pgProductos=productos;render();pgCargarCarritoDesdeEnlace()});
   /* Por seguridad NO se suscribe a todo el nodo 'clientes' (datos privados de todos). Se consulta por telefono bajo demanda en cliente() y saveTransaction(). */
   onValue(ref(db,'anuncios'),s=>{renderCarrusel(s.val()||{})});
   onValue(ref(db,'config/empresa'),s=>{var e=s.val()||{};window.__pgEmpresa=e;if(e.chatbotUrl&&/^https?:\/\//i.test(e.chatbotUrl))window.WEB_APP_URL=e.chatbotUrl;renderHorario(e);renderEmpresa(e)});
@@ -2082,7 +2123,7 @@ calc();
     <div class="wm-list">
       <div class="wm-item">
         <div class="wm-ic"><i class="fas fa-star"></i></div>
-        <div class="wm-tx"><b>Acumula estrellas</b><small>Ganás 1 estrella por compra confirmada. ¡Cada córdoba suma!</small></div>
+        <div class="wm-tx"><b>Acumula estrellas</b><small>Ganás 1 estrella por cada C$100 de compra. ¡Cada córdoba suma!</small></div>
       </div>
       <div class="wm-item">
         <div class="wm-ic"><i class="fas fa-percent"></i></div>
