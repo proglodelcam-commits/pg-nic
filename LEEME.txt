@@ -1,0 +1,14 @@
+PG del Campo — corrección de imágenes 2026-11-25
+
+Causa: las fotos de Firebase son Base64. El filtro PGUrl solo admite enlaces HTTP/HTTPS, por lo que las convertía en #.
+Corrección: las imágenes raster válidas se convierten a Blob URL, sin admitir SVG ni HTML, y se conservan los enlaces web normales. No se alteran precios, stock, estrellas, pagos, bot o registros.
+
+PUBLICACIÓN:
+1. En pg-nic, reemplazá identidad.js en la raíz con el archivo de este ZIP.
+2. Después reemplazá app-6.js, también en la raíz. Subí los dos en el mismo commit si es posible.
+3. No cambies index.html, sw.js, sw-pg-seguro.js o Render por esta corrección.
+4. Esperá GitHub Pages. Cerrá las ventanas anteriores y probá en una pestaña privada.
+5. Verificá las siete fotos y probá agregar un producto al carrito.
+
+No subas estos archivos a otra carpeta: el index corregido actual los carga desde la raíz.
+Verificación local: 15 pruebas, siete imágenes raster reales verificadas y sintaxis correcta. Falta validación visual en tu teléfono después de publicar.

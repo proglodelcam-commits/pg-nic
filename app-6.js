@@ -163,12 +163,14 @@ function render(){
   Object.entries(productos).forEach(function([id,p]){
     let st=p.controla_stock===false?999999:(+p.stock||0);
     let ku=kyteOf(p);
-    let imgHtml=p.imagen
-      ?'<img class="product-image" src="'+E(PGUrl(p.imagen))+'" alt="'+E(p.nombre)+'" data-pg-error="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="product-image-fallback" style="display:none"><i class="fas fa-leaf"></i></div>'
+    let imageUrl=PGImagen(p.imagen);
+    let imgHtml=imageUrl
+      ?'<img class="product-image" src="'+E(imageUrl)+'" alt="'+E(p.nombre)+'" data-pg-error="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="product-image-fallback" style="display:none"><i class="fas fa-leaf"></i></div>'
       :'<div class="product-image-fallback"><i class="fas fa-leaf"></i></div>';
     html+='<div class="product-card"><div class="product-image-container"><a class="product-image-link" href="'+E(PGUrl(ku))+'" target="_blank" rel="noopener noreferrer" title="Ver en Kyte">'+imgHtml+'</a></div><div class="product-info"><h4 class="product-name" title="'+E(p.nombre)+'">'+E(p.nombre)+'</h4><p style="font-size:10px;color:var(--text-muted);margin-bottom:4px">'+(st?st+' disponibles':'Agotado')+'</p><div class="product-price">'+M(p.precio)+'</div><button class="btn-add" '+(st?'':'disabled')+' data-pg-click="add(\''+E(id)+'\')">'+(st?'+ Agregar':'Agotado')+'</button><a class="product-kyte" href="'+E(PGUrl(ku))+'" target="_blank" rel="noopener noreferrer">Ver en Kyte \u2197</a></div></div>';
   });
   c.innerHTML=html||'<p style="padding:20px;color:var(--text-muted);text-align:center">No hay productos disponibles.</p>';
+  PGImagenLimpiar(Object.values(productos).map(p=>p&&p.imagen));
 }
 
 /* ── Horario de atención (editable desde el Panel-Admin, nodo config/empresa) ── */

@@ -1,0 +1,10 @@
+OK foto -P3CWwsgeuWEoiXqpQlT: raster decodificable y verificado.
+OK foto P01: raster decodificable y verificado.
+OK foto P02: raster decodificable y verificado.
+OK foto P03: raster decodificable y verificado.
+OK foto P04: raster decodificable y verificado.
+OK foto P06: raster decodificable y verificado.
+OK foto P07: raster decodificable y verificado.
+OK sintaxis de ambos archivos finales.
+OK 15 pruebas locales: 7 fotos reales, caché, enlaces, rechazo de contenido no permitido y limpieza.
+Sin prueba visual en navegador; no se modificaron Firebase o producción.
