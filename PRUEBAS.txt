@@ -1,0 +1,23 @@
+OK espera al catálogo
+OK ejemplo real cuatro cafés 400gr
+OK recalcula con precios reales
+OK actualizaciones del catálogo no duplican carrito
+OK varios productos
+OK items codificados
+OK items en hash con consulta
+OK sin items no cambia carrito
+OK duplicados se suman en una sola línea
+OK rechaza enlace P01:0
+OK rechaza enlace P01:-1
+OK rechaza enlace P01:1.5
+OK rechaza enlace P01:101
+OK rechaza enlace P01:60,P01:60
+OK rechaza enlace P01
+OK rechaza enlace NO_EXISTE:1
+OK rechaza enlace p01:1
+OK rechaza enlace P01:9999
+OK rechaza enlace a/b:1
+OK rechaza enlace P07:1
+OK fallo no carga pedido parcial ni borra lista previa
+OK interfaz carga pendiente por llamada
+TOTAL 22 pruebas aprobadas. No se registra ni se cobra una orden al importar.

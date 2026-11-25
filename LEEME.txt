@@ -1,14 +1,18 @@
-PG del Campo — corrección de imágenes 2026-11-25
+PG del Campo — carrito desde enlace del bot
 
-Causa: las fotos de Firebase son Base64. El filtro PGUrl solo admite enlaces HTTP/HTTPS, por lo que las convertía en #.
-Corrección: las imágenes raster válidas se convierten a Blob URL, sin admitir SVG ni HTML, y se conservan los enlaces web normales. No se alteran precios, stock, estrellas, pagos, bot o registros.
+Causa verificada: app-6.js publicado no contiene un lector de items de la URL. La corrección espera al catálogo Firebase antes de preparar el carrito, conserva IDs exactos y utiliza precios actuales.
 
-PUBLICACIÓN:
-1. En pg-nic, reemplazá identidad.js en la raíz con el archivo de este ZIP.
-2. Después reemplazá app-6.js, también en la raíz. Subí los dos en el mismo commit si es posible.
-3. No cambies index.html, sw.js, sw-pg-seguro.js o Render por esta corrección.
-4. Esperá GitHub Pages. Cerrá las ventanas anteriores y probá en una pestaña privada.
-5. Verificá las siete fotos y probá agregar un producto al carrito.
+SUBIR:
+1. Reemplazá únicamente app-6.js en la raíz de pg-nic.
+2. Esperá la publicación de GitHub Pages.
+3. Pedí al bot 4 cafés clásicos de 400gr, terminá con listo y abrí el enlace en una pestaña privada.
+4. Deben aparecer 4 unidades y el subtotal con el precio actual del catálogo. Después el cliente completa datos y confirma.
 
-No subas estos archivos a otra carpeta: el index corregido actual los carga desde la raíz.
-Verificación local: 15 pruebas, siete imágenes raster reales verificadas y sintaxis correcta. Falta validación visual en tu teléfono después de publicar.
+No cambiar index, identidad.js, caché, Firebase o Render por este parche. Se conserva la corrección de fotos, el registro pendiente de pedidos y la regla de estrellas.
+
+Formato admitido: parámetro items=ID:CANTIDAD; varios productos separados por comas; #pedido como sección final. IDs sensibles a mayúsculas/minúsculas. También admite items dentro de #pedido?items=...
+El enlace solo prepara el carrito: no registra, cobra, confirma ni descuenta stock. Si algún producto no existe o no alcanza el stock, avisa sin cargar un pedido parcial.
+
+Si el bot entrega únicamente #pedido, sin items ni cantidades, la tienda no puede reconstruir la compra. En ese caso compartí el enlace exacto o el bot.js vigente para corregir su generación, sin inventar códigos. Este parche no cambia el servidor del bot.
+
+22 pruebas locales aprobadas, incluida la clave real del café 400gr con cantidad 4, carga posterior a Firebase, cantidades inválidas, repetición, stock y ausencia de carga parcial. Sintaxis correcta; imágenes y funciones de pedidos preservadas. Sin validación en navegador real o despliegue en producción.

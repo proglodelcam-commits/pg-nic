@@ -63,21 +63,67 @@ window.pgContextoTienda=function(){
     out.push('Tienda en linea oficial: https://proglodelcampo.catalog.kyte.site');
     if(e.enlaceKyte) out.push('Catalogo Kyte: '+e.enlaceKyte);
     var P=window.__pgProductos||{};
-    var items=Object.keys(P).map(function(k){return P[k];}).filter(function(p){return p&&p.visible!==false;});
+    var items=Object.entries(P).filter(function(entry){return entry[1]&&entry[1].visible!==false;});
     if(items.length){
       out.push('CATALOGO ('+items.length+' productos):');
-      items.forEach(function(p){
+      out.push('Enlace para preparar carrito: https://proglodelcam-commits.github.io/pg-nic/?items=ID:CANTIDAD#pedido. Usar IDs exactos y separar productos con comas. No confirmar ni cobrar desde el enlace.');
+      items.forEach(function(entry){
+        var id=entry[0],p=entry[1];
         var disp=(p.controla_stock===false)?'disponible':((Number(p.stock||0)>0)?'disponible':'agotado');
-        out.push('- '+(p.nombre||'Producto')+': '+M(p.precio)+(p.categoria?(' | '+p.categoria):'')+' | '+disp+(p.puntos?(' | '+p.puntos+' pts fidelidad'):''));
+        out.push('- ID='+id+' | '+(p.nombre||'Producto')+': '+M(p.precio)+(p.categoria?(' | '+p.categoria):'')+' | '+disp+(p.puntos?(' | '+p.puntos+' pts fidelidad'):''));
       });
     }
     return out.join('\n');
   }catch(err){ return ''; }
 };
 
+
+/* PG del Campo — importar el carrito del bot, sin registrar ni pagar una orden. */
+let pgCatalogoListo=false,pgImportado=false,pgImportando=false;
+function pgLeerItemsURL(){
+ const u=new URL(window.location.href);let raw=u.searchParams.get('items');
+ if(raw===null){const hash=u.hash.replace(/^#/,'');const at=hash.indexOf('?');if(at>=0)raw=new URLSearchParams(hash.slice(at+1)).get('items');}
+ return raw;
+}
+let pgItemsPendientes=pgLeerItemsURL();
+function pgParseItems(raw){
+ if(typeof raw!=='string'||!raw.trim()||raw.length>6000)throw new Error('El enlace no contiene una lista de productos válida.');
+ const parts=raw.split(',');if(parts.length>30)throw new Error('El enlace contiene demasiados productos.');
+ const result=new Map();
+ for(const part of parts){
+  const match=/^([^:]+):([0-9]+)$/.exec(part.trim());
+  if(!match)throw new Error('El enlace de compra tiene un formato inválido.');
+  const id=match[1],q=Number(match[2]);
+  if(id.length>100||/[.#$\[\]\/\u0000-\u001f]/.test(id)||!Number.isInteger(q)||q<1||q>100)throw new Error('El enlace tiene un código o una cantidad inválida.');
+  const total=(result.get(id)||0)+q;if(total>100)throw new Error('Cantidad excesiva para un producto del enlace.');
+  result.set(id,total);
+ }
+ return Array.from(result,([id,q])=>({id,q}));
+}
+function pgAplicarPedidoEnlace(){
+ if(!pgCatalogoListo||pgImportado||pgImportando||pgItemsPendientes===null)return;
+ pgImportando=true;
+ try{
+  const requests=pgParseItems(pgItemsPendientes),fresh=[];
+  for(const item of requests){
+   const p=productos[item.id];
+   if(!p||p.visible===false)throw new Error('Un producto del enlace no está disponible. Pedí al asistente un enlace actualizado.');
+   if(p.controla_stock!==false&&item.q>Number(p.stock||0))throw new Error('No hay existencias suficientes de '+String(p.nombre||'este producto')+' para la cantidad del enlace.');
+   const price=Number(p.precio);if(!Number.isFinite(price)||price<0)throw new Error('El producto no tiene un precio válido.');
+   fresh.push({id:item.id,n:String(p.nombre||'Producto'),price,q:item.q});
+  }
+  // Everything is validated before replacing the cart; no partial order from a broken link.
+  carrito=fresh;pgImportado=true;calc();
+  if(typeof window.navegarA==='function')window.navegarA('pedido');
+  else if(typeof window.irAPedido==='function')window.irAPedido();
+ }catch(e){pgImportado=true;alert('No se pudo preparar el carrito del enlace: '+e.message+' El pedido no se registró ni se cobró.');}
+ finally{pgImportando=false;}
+}
+window.PG_cargarPedidoEnlace=function(raw){pgItemsPendientes=raw;pgImportado=false;pgAplicarPedidoEnlace();};
+
 /* ── Listeners de Firebase (tiempo real) ── */
 function startSync(){
-  onValue(ref(db,'productos'),s=>{productos=s.val()||{};window.__pgProductos=productos;render()});
+  onValue(ref(db,'productos'),s=>{productos=s.val()||{};window.__pgProductos=productos;render();pgCatalogoListo=true;pgAplicarPedidoEnlace();});
   /* Por seguridad NO se suscribe a todo el nodo 'clientes' (datos privados de todos). Se consulta por telefono bajo demanda en cliente() y saveTransaction(). */
   onValue(ref(db,'anuncios'),s=>{renderCarrusel(s.val()||{})});
   onValue(ref(db,'config/empresa'),s=>{var e=s.val()||{};window.__pgEmpresa=e;if(e.chatbotUrl&&/^https?:\/\//i.test(e.chatbotUrl))window.WEB_APP_URL=e.chatbotUrl;renderHorario(e);renderEmpresa(e)});
