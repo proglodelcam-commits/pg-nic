@@ -1,5 +1,5 @@
 const PREFIX='pg-tienda-seguro-';
-const CACHE=PREFIX+'20261125-v2-pedido';
+const CACHE=PREFIX+'20261126-cliente-v1';
 self.addEventListener('install',event=>{self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{
  const keys=await caches.keys();

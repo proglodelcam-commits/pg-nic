@@ -455,7 +455,7 @@ footer{background-color:var(--primary-dark);color:var(--white);padding:24px 0 40
 
 </style>
 <script src="./identidad.js"></script>
-<script type="module" src="./servicio.js"></script>
+<script type="module" src="./servicio.js?v=cliente20261126"></script>
 <script defer src="./eventos.js"></script>
 </head>
 <body>
@@ -487,8 +487,8 @@ footer{background-color:var(--primary-dark);color:var(--white);padding:24px 0 40
 <!-- Cintillo Marquee -->
 <div class="marquee-container">
   <div class="marquee-track">
-    <span class="marquee-text">בס"ד - Con la ayuda del Dios todo es posible realizar - BS"D</span>
-    <span class="marquee-text">בס"ד - Con la ayuda del Dios todo es posible realizar - BS"D</span>
+    <span class="marquee-text">בס"ד - Con la ayuda de Dios todo es posible realizar - BS"D</span>
+    <span class="marquee-text">בס"ד - Con la ayuda de Dios todo es posible realizar - BS"D</span>
   </div>
 </div>
 
@@ -589,10 +589,11 @@ footer{background-color:var(--primary-dark);color:var(--white);padding:24px 0 40
           <label>WhatsApp / Código de cliente *</label>
           <input type="tel" id="cliente-tel" maxlength="15" placeholder="88888888" data-pg-input="cliente()">
           <small class="campo-ayuda">Usamos tu WhatsApp para avisarte cuando el pedido esté listo.</small>
+          <small id="cliente-consulta" class="campo-ayuda" role="status" aria-live="polite"></small>
         </div>
         <div class="form-group">
           <label>Nombre Completo / Razón Social *</label>
-          <input type="text" id="cliente-nombre" placeholder="Ej: José Gutiérrez">
+          <input type="text" id="cliente-nombre" placeholder="Ej: José Gutiérrez" data-pg-input="calc()">
         </div>
         <div class="form-group">
           <label>Dirección Física de Destino</label>
@@ -1276,10 +1277,10 @@ footer{background-color:var(--primary-dark);color:var(--white);padding:24px 0 40
 <script src="./app-4.js"></script>
 
 <!-- Script: ChatBot BotsPG (bot propio de PG del Campo, sin IA externa) -->
-<script src="./app-5.js?v=20261125-pedido2"></script>
+<script src="./app-5.js"></script>
 
 <!-- Script: Firebase + Lógica de negocio -->
-<script type="module" src="./app-6.js?v=20261125-pedido2"></script>
+<script type="module" src="./app-6.js?v=cliente20261126"></script>
 
 <!-- ===== Pop-up de Bienvenida: Resumen de Beneficios ===== -->
 <style>
@@ -1360,6 +1361,6 @@ footer{background-color:var(--primary-dark);color:var(--white);padding:24px 0 40
   Agregar a Google Wallet
 </button>
 <script src="./app-8.js"></script>
-<p class="pg-version" style="text-align:center;font-size:11px;color:#52644f;padding:12px">Versión 2026-11-25 · Chat v6.2.0 · Pedido desde chat</p>
+<p class="pg-version" style="text-align:center;font-size:11px;color:#52644f;padding:12px">Versión 2026-11-25 · Consulta de cliente v1</p>
 </body>
 </html>

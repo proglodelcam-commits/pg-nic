@@ -281,18 +281,53 @@ window.add=function(id){
 window.removeItem=function(id){carrito=carrito.filter(function(x){return x.id!==id});calc()};
 
 /* ── Cliente ── */
-window.cliente=async function(){
-  const raw=$('cliente-tel').value.trim();
-  if(!raw){cActual=null;calc();return;}
+let pgClienteTimer=null,pgClienteRevision=0,pgClienteAutoNombre='',pgClienteTelefono='';
+function pgEstadoCliente(message){
+ const near=$('cliente-consulta'),info=$('clientInfo');
+ if(near)near.textContent=message;
+ if(info)info.textContent=message||'Ingresá tu WhatsApp para consultar tus datos.';
+}
+window.cliente=function(){
+ clearTimeout(pgClienteTimer);const revision=++pgClienteRevision;
+ const input=$('cliente-tel'),name=$('cliente-nombre');
+ if(!input||!name)return;
+ const raw=input.value.trim();let tel='';
+ try{tel=PGWhatsApp.local(raw);}catch(e){}
+ // Limpiar solamente un nombre que fue completado por el sistema, no uno escrito por el cliente.
+ if(tel!==pgClienteTelefono){
+  if(pgClienteAutoNombre&&name.value===pgClienteAutoNombre)name.value='';
+  pgClienteAutoNombre='';pgClienteTelefono=tel;cActual=null;
+ }
+ if(!raw){pgEstadoCliente('');calc();return;}
+ if(!tel){pgEstadoCliente('Completá los 8 dígitos de tu WhatsApp. También podés usar +505.');calc();return;}
+ pgEstadoCliente('Buscando cliente registrado…');calc();
+ pgClienteTimer=setTimeout(async()=>{
   try{
-    const d=await PGServicio.resumen(raw);
-    if(raw!==$('cliente-tel').value.trim())return;
-    cActual={nombre:d.nombre,total_compras:d.compras};
-    if(d.nombre!=='Cliente PG'&&!$('cliente-nombre').value)$('cliente-nombre').value=d.nombre;
-    $('clientInfo').textContent=d.nombre+' · '+d.compras+' compras confirmadas'+(d.aviso?' · '+d.aviso:'');
-  }catch(e){cActual=null;$('clientInfo').textContent=e.message;}
+   const d=await PGServicio.nombreCliente(tel);
+   if(revision!==pgClienteRevision||PGWhatsApp.local(input.value)!==tel)return;
+   const nombre=typeof d?.nombre==='string'?d.nombre.trim():'';
+   const registrado=d?.registrado!==false&&nombre&&nombre!=='Cliente PG';
+   const compras=Number(d?.compras);
+   if(registrado){
+    cActual={nombre,total_compras:Number.isFinite(compras)&&compras>=0?compras:0};
+    if(!name.value.trim()||name.value===pgClienteAutoNombre){name.value=nombre;pgClienteAutoNombre=nombre;}
+    pgEstadoCliente('Cliente registrado: '+nombre+'.'+(Number.isFinite(compras)?' '+compras+' compras confirmadas.':'')+(d.aviso?' '+String(d.aviso):''));
+   }else{
+    cActual=null;
+    if(pgClienteAutoNombre&&name.value===pgClienteAutoNombre)name.value='';
+    pgClienteAutoNombre='';pgEstadoCliente('No encontramos un nombre registrado para este número. Escribí tu nombre completo.');
+   }
+  }catch(e){
+   if(revision!==pgClienteRevision)return;
+   cActual=null;
+   pgEstadoCliente(e?.message||'No se pudo consultar el cliente. Podés escribir tu nombre manualmente.');
+  }
   calc();
+ },400);
 };
+// Reconsultar un número que el navegador hubiera restaurado al abrir la página.
+queueMicrotask(()=>{if($('cliente-tel')?.value.trim())window.cliente();});
+
 let pgFidelidad={volumen:[{min:600,pct:1},{min:1200,pct:2},{min:1800,pct:3}]};
 onValue(ref(db,'config/fidelidad'),s=>{pgFidelidad=s.val()||pgFidelidad;calc();});
 /* ── Descuento por volumen ── */
