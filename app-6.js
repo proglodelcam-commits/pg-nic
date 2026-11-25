@@ -60,7 +60,7 @@ window.pgContextoTienda=function(){
     if(e.pagoEntrega) out.push('Pago contra entrega: '+String(e.pagoEntrega).replace(/\s+/g,' ').trim());
     if(e.banco) out.push('Pago por transferencia: '+e.banco+(e.cuenta?(' Cta '+e.cuenta):'')+(e.ach?(' ACH '+e.ach):''));
     if(e.mision) out.push('Mision: '+String(e.mision).replace(/\s+/g,' ').trim());
-    out.push('Tienda en linea oficial: https://proglodelcampo.catalog.kyte.site');
+    out.push('Tienda en linea oficial para pedidos del asistente: https://proglodelcam-commits.github.io/pg-nic/');
     if(e.enlaceKyte) out.push('Catalogo Kyte: '+e.enlaceKyte);
     var P=window.__pgProductos||{};
     var items=Object.entries(P).filter(function(entry){return entry[1]&&entry[1].visible!==false;});
@@ -114,12 +114,15 @@ function pgAplicarPedidoEnlace(){
   }
   // Everything is validated before replacing the cart; no partial order from a broken link.
   carrito=fresh;pgImportado=true;calc();
+  const section=document.getElementById('pedido');
+  if(section){let notice=document.getElementById('pg-pedido-enlace-aviso');if(!notice){notice=document.createElement('p');notice.id='pg-pedido-enlace-aviso';notice.setAttribute('role','status');notice.style.cssText='padding:12px;border:1px solid #c8963e;border-radius:12px;background:#fff8e8;color:#1b382b;margin:12px 0;font-size:13px';section.prepend(notice);}notice.textContent='Carrito cargado con '+fresh.reduce((n,i)=>n+i.q,0)+' unidades. Revisá los productos y precios, completá tus datos y confirmá por WhatsApp.';}
   if(typeof window.navegarA==='function')window.navegarA('pedido');
   else if(typeof window.irAPedido==='function')window.irAPedido();
  }catch(e){pgImportado=true;alert('No se pudo preparar el carrito del enlace: '+e.message+' El pedido no se registró ni se cobró.');}
  finally{pgImportando=false;}
 }
 window.PG_cargarPedidoEnlace=function(raw){pgItemsPendientes=raw;pgImportado=false;pgAplicarPedidoEnlace();};
+window.addEventListener('hashchange',function(){const raw=pgLeerItemsURL();if(raw!==null&&raw!==pgItemsPendientes)window.PG_cargarPedidoEnlace(raw);});
 
 /* ── Listeners de Firebase (tiempo real) ── */
 function startSync(){
