@@ -587,8 +587,8 @@ footer{background-color:var(--primary-dark);color:var(--white);padding:24px 0 40
 
         <div class="form-group">
           <label>WhatsApp / Código de cliente *</label>
-          <input type="tel" id="cliente-tel" maxlength="15" placeholder="88888888" data-pg-input="cliente()">
-          <small class="campo-ayuda">Usamos tu WhatsApp para avisarte cuando el pedido esté listo.</small>
+          <input type="tel" id="cliente-tel" maxlength="8" minlength="8" inputmode="numeric" pattern="[5678][0-9]{7}" autocomplete="tel-national" placeholder="Ej: 82730255" data-pg-input="cliente()">
+          <small class="campo-ayuda">Ingresá los 8 dígitos de tu WhatsApp, sin +505. Te avisaremos cuando el pedido esté listo.</small>
           <small id="cliente-consulta" class="campo-ayuda" role="status" aria-live="polite"></small>
         </div>
         <div class="form-group">
@@ -1280,7 +1280,7 @@ footer{background-color:var(--primary-dark);color:var(--white);padding:24px 0 40
 <script src="./app-5.js"></script>
 
 <!-- Script: Firebase + Lógica de negocio -->
-<script type="module" src="./app-6.js?v=cliente20261126"></script>
+<script type="module" src="./app-6.js?v=whatsapp8-20261126"></script>
 
 <!-- ===== Pop-up de Bienvenida: Resumen de Beneficios ===== -->
 <style>
@@ -1361,6 +1361,6 @@ footer{background-color:var(--primary-dark);color:var(--white);padding:24px 0 40
   Agregar a Google Wallet
 </button>
 <script src="./app-8.js"></script>
-<p class="pg-version" style="text-align:center;font-size:11px;color:#52644f;padding:12px">Versión 2026-11-25 · Consulta de cliente v1</p>
+<p class="pg-version" style="text-align:center;font-size:11px;color:#52644f;padding:12px">Versión 2026-11-25 · Consulta de cliente v2 · WhatsApp de 8 dígitos</p>
 </body>
 </html>

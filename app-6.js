@@ -291,6 +291,7 @@ window.cliente=function(){
  clearTimeout(pgClienteTimer);const revision=++pgClienteRevision;
  const input=$('cliente-tel'),name=$('cliente-nombre');
  if(!input||!name)return;
+ input.value=input.value.replace(/[^0-9]/g,'').slice(0,8);
  const raw=input.value.trim();let tel='';
  try{tel=PGWhatsApp.local(raw);}catch(e){}
  // Limpiar solamente un nombre que fue completado por el sistema, no uno escrito por el cliente.
@@ -299,7 +300,7 @@ window.cliente=function(){
   pgClienteAutoNombre='';pgClienteTelefono=tel;cActual=null;
  }
  if(!raw){pgEstadoCliente('');calc();return;}
- if(!tel){pgEstadoCliente('Completá los 8 dígitos de tu WhatsApp. También podés usar +505.');calc();return;}
+ if(!tel){pgEstadoCliente('Completá los 8 dígitos de tu WhatsApp, sin +505.');calc();return;}
  pgEstadoCliente('Buscando cliente registrado…');calc();
  pgClienteTimer=setTimeout(async()=>{
   try{
@@ -325,6 +326,32 @@ window.cliente=function(){
   calc();
  },400);
 };
+// Entrada local: ocho dígitos. Un pegado internacional válido se convierte a formato local.
+const pgTelefonoInput=$('cliente-tel');
+if(pgTelefonoInput){
+ pgTelefonoInput.addEventListener('beforeinput',event=>{
+  if(!event.inputType?.startsWith('insert')||event.data===null)return;
+  const start=pgTelefonoInput.selectionStart??pgTelefonoInput.value.length;
+  const end=pgTelefonoInput.selectionEnd??start;
+  const next=pgTelefonoInput.value.slice(0,start)+event.data+pgTelefonoInput.value.slice(end);
+  if(!/^[0-9]{0,8}$/.test(next))event.preventDefault();
+ });
+ pgTelefonoInput.addEventListener('paste',event=>{
+  event.preventDefault();
+  let text=event.clipboardData?.getData('text')?.trim()||'';
+  // Eliminar espacios/guiones habituales, pero no letras ni dígitos adicionales.
+  text=text.replace(/[\s()+.-]/g,'');
+  if(text.startsWith('00505')&&text.length===13)text=text.slice(5);
+  else if(text.startsWith('505')&&text.length===11)text=text.slice(3);
+  const start=pgTelefonoInput.selectionStart??pgTelefonoInput.value.length;
+  const end=pgTelefonoInput.selectionEnd??start;
+  const next=pgTelefonoInput.value.slice(0,start)+text+pgTelefonoInput.value.slice(end);
+  if(!/^[0-9]{1,8}$/.test(next)){pgEstadoCliente('Pegá un WhatsApp de 8 dígitos. El contenido no se cambió.');return;}
+  pgTelefonoInput.value=next;
+  window.cliente();
+ });
+}
+
 // Reconsultar un número que el navegador hubiera restaurado al abrir la página.
 queueMicrotask(()=>{if($('cliente-tel')?.value.trim())window.cliente();});
 
