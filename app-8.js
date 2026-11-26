@@ -1,1 +1,0 @@
-(function(){const b=document.getElementById('gw-btn');if(b)b.addEventListener('click',()=>alert('Google Wallet está pendiente de actualizar su servicio seguro. Podés consultar tus estrellas en la tarjeta web. No se enviarán saldos desde el navegador.'));})();
