@@ -456,7 +456,38 @@ footer{background-color:var(--primary-dark);color:var(--white);padding:24px 0 40
 </style>
 <script src="./identidad.js"></script>
 <script type="module" src="./servicio.js?v=sinblaze20261126"></script>
-<script defer src="./eventos.js"></script>
+<script defer src="./eventos.js?v=catalogo20261126"></script>
+<style>
+#chatbot-launcher{width:48px;height:48px;right:12px;bottom:80px}
+#chatbot-launcher svg{width:30px;height:30px}
+.pg-catalog-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 10px}
+.pg-catalog-tools input,.pg-catalog-tools select,.pg-catalog-tools button{width:100%;min-width:0;padding:9px 10px;border:1px solid var(--border-color);border-radius:10px;font:inherit;font-size:12.5px;background:#fff;color:var(--text-dark)}
+.pg-catalog-tools button{background:var(--primary);color:#fff;border:0;font-weight:700;cursor:pointer}
+@media(min-width:900px){.pg-catalog-tools{grid-template-columns:2fr 1.2fr 1fr 1fr .9fr .9fr auto auto}}
+.pg-cat-chips{display:flex;gap:7px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
+.pg-cat-chips::-webkit-scrollbar{display:none}
+.pg-cat-chips button{flex:0 0 auto;border:1px solid var(--border-color);background:#fff;color:var(--primary);padding:7px 14px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer}
+.pg-cat-chips button.selected{background:var(--primary);color:#fff;border-color:var(--primary)}
+.pg-check{display:flex;align-items:center;gap:6px;font-size:12px;padding:0 4px}
+.pg-check input{width:auto}
+.pg-resultados,.pg-carrito-aviso{margin:0 0 10px;font-size:12px;color:var(--text-muted)}
+.pg-carrito-aviso:empty{display:none}
+.pg-carrito-aviso{color:var(--primary-dark);font-weight:600}
+.pg-product-category{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:#8a6a24;background:#fbf3e2;border-radius:999px;padding:2px 7px;margin-bottom:5px}
+.pg-product-stock{font-size:10.5px;color:var(--text-muted);margin:0 0 5px}
+.pg-product-quantity{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:0 0 7px}
+.pg-product-quantity label{font-size:10.5px;color:var(--text-muted)}
+.pg-product-quantity input{width:64px;padding:6px 8px;border:1px solid var(--border-color);border-radius:8px;font:inherit;font-size:12.5px;text-align:center}
+.pg-product-details{font-size:11px;color:var(--text-muted);margin-top:6px}
+.pg-product-details summary{cursor:pointer;color:var(--primary);font-weight:700}
+.pg-product-details p{margin:5px 0 0;line-height:1.45}
+.pg-empty-results{grid-column:1/-1;text-align:center;padding:24px 12px;color:var(--text-muted);font-size:13px}
+.pg-kyte-alt{font-size:11.5px;color:var(--text-muted);text-align:center;margin:6px 0 20px}
+.pg-kyte-alt a{color:var(--accent);font-weight:700;text-decoration:none}
+.pg-cart-quantity{display:flex;align-items:center;gap:5px;margin:3px 0}
+.pg-cart-quantity button{width:28px;height:28px;border-radius:6px;border:1px solid var(--border-color);background:#fff;color:var(--primary);font-weight:800;line-height:1;cursor:pointer}
+.pg-cart-quantity span{min-width:18px;text-align:center;font-size:12px;font-weight:700}
+</style>
 </head>
 <body>
 <!-- PANTALLA DE BIENVENIDA ANIMADA -->
@@ -546,15 +577,29 @@ footer{background-color:var(--primary-dark);color:var(--white);padding:24px 0 40
   <section id="productos" class="section">
     <div class="container">
       <h2 class="section-title">Catálogo</h2>
-      <div class="kyte-cta">
-        <a class="kyte-cta-btn" href="https://proglodelcampo.catalog.kyte.site" target="_blank" rel="noopener noreferrer">
-          Comprar en nuestra Tienda Kyte <span class="kyte-cta-ico">↗</span>
-        </a>
-        <p class="kyte-cta-txt">Explorá todo nuestro catálogo y realizá tu pedido directamente en nuestra tienda en línea de Kyte.</p>
+      <div class="pg-catalog-tools" role="search" aria-label="Filtros del catálogo">
+        <input id="pg-buscar" type="search" placeholder="Buscar producto…" aria-label="Buscar producto">
+        <select id="pg-categoria" aria-label="Categoría"><option value="">Todas las categorías</option><option value="Café">Café</option><option value="Pinolillo">Pinolillo</option><option value="Pinol">Pinol</option><option value="Humus">Humus</option><option value="Otros">Otros</option></select>
+        <select id="pg-presentacion" aria-label="Presentación"><option value="">Todas las presentaciones</option></select>
+        <select id="pg-orden" aria-label="Ordenar"><option value="nombre">Nombre A–Z</option><option value="precio-asc">Precio: menor a mayor</option><option value="precio-desc">Precio: mayor a menor</option></select>
+        <input id="pg-precio-min" type="number" min="0" inputmode="numeric" placeholder="Precio mínimo" aria-label="Precio mínimo">
+        <input id="pg-precio-max" type="number" min="0" inputmode="numeric" placeholder="Precio máximo" aria-label="Precio máximo">
+        <label class="pg-check"><input id="pg-disponibles" type="checkbox"> Solo disponibles</label>
+        <button id="pg-limpiar" type="button" data-pg-click="pgLimpiarFiltros()">Limpiar</button>
       </div>
+      <div class="pg-cat-chips" role="group" aria-label="Categorías rápidas">
+        <button type="button" data-pg-cat="" data-pg-click="pgElegirCategoria('')">Todos</button>
+        <button type="button" data-pg-cat="Café" data-pg-click="pgElegirCategoria('Café')">Café</button>
+        <button type="button" data-pg-cat="Pinolillo" data-pg-click="pgElegirCategoria('Pinolillo')">Pinolillo</button>
+        <button type="button" data-pg-cat="Pinol" data-pg-click="pgElegirCategoria('Pinol')">Pinol</button>
+        <button type="button" data-pg-cat="Humus" data-pg-click="pgElegirCategoria('Humus')">Humus</button>
+      </div>
+      <p id="pg-resultados" class="pg-resultados" role="status" aria-live="polite"></p>
+      <p id="pg-carrito-aviso" class="pg-carrito-aviso" role="status" aria-live="polite"></p>
       <div id="products-grid" class="products-grid">
         <p style="padding:20px;color:var(--text-muted);text-align:center">Cargando productos...</p>
       </div>
+      <p class="pg-kyte-alt">¿Preferís otra opción? <a href="https://proglodelcampo.catalog.kyte.site" target="_blank" rel="noopener noreferrer">También podés comprar en Kyte ↗</a></p>
     </div>
   </section>
 
@@ -576,7 +621,7 @@ footer{background-color:var(--primary-dark);color:var(--white);padding:24px 0 40
 
         <!-- Productos en carrito -->
         <div class="panel-section-title">
-          Resumen de Productos <span id="cart-count" style="font-size:11px;font-weight:normal;margin-left:auto">0 Items</span>
+          Resumen de Productos <span id="cart-count" style="font-size:11px;font-weight:normal;margin-left:auto">0 unidades</span>
         </div>
         <div id="cart-items" class="cart-items-container">
           <div class="cart-empty">El carrito está vacío</div>
@@ -618,8 +663,7 @@ footer{background-color:var(--primary-dark);color:var(--white);padding:24px 0 40
         <div class="form-group">
           <label>Zona / Modalidad de Despacho</label>
           <select id="zona-envio" data-pg-change="calc()">
-            <option value="20" data-nombre="Envío a Domicilio / Jinotepe">Envío a Domicilio - Jinotepe, Dolores, Diriamba, San Marcos (C$ 20.00)</option>
-            <option value="0" data-nombre="Retiro en Local">Retiro en local — Sin costo</option>
+            <option value="20" data-nombre="Entrega a domicilio o comercio / Jinotepe">Entrega a domicilio o comercio - Jinotepe, Dolores, Diriamba, San Marcos (C$ 20.00)</option>
             <option value="-1" data-nombre="Envío a Convenir (Departamentos)">Departamentos - A Convenir</option>
           </select>
         </div>
@@ -672,7 +716,7 @@ footer{background-color:var(--primary-dark);color:var(--white);padding:24px 0 40
         <div class="totals-line total"><span id="totalLabel">TOTAL NETO A PAGAR:</span><strong id="total-pagar">C$ 0.00</strong></div>
 
         <div id="ret" class="notice credit" style="display:none">Cliente jurídico: revise la retención del 2% I.R. cuando corresponda.</div>
-        <div id="modeNotice" class="notice cash"><b>CONTADO:</b> tu pedido queda registrado como orden. El pago se coordina al confirmar — por WhatsApp te decimos cómo seguimos.</div>
+        <div id="modeNotice" class="notice cash"><b>CONTADO:</b> Solicitud pendiente de confirmación por WhatsApp. El pedido se confirma cuando el negocio lo aprueba.</div>
         <div id="avisoCierre" class="notice-antes-del-boton">Revisá tus datos antes de confirmar. El pedido se cierra cuando nos escribís por WhatsApp.</div>
 
         <button id="btn-whatsapp" class="btn-action btn-whatsapp" data-pg-click="procesar()" disabled>
@@ -738,7 +782,7 @@ footer{background-color:var(--primary-dark);color:var(--white);padding:24px 0 40
           <li><span class="num">2</span><span>Realiza tus compras — Compra tus productos favoritos y acumula.</span></li>
           <li><span class="num">3</span><span>Kyte registra tu historial — Todas tus compras quedan registradas automáticamente.</span></li>
           <li><span class="num">4</span><span>Consulta tu historial — Revisa tus compras en tu cuenta “Pedido” en Kyte.</span></li>
-          <li><span class="num">5</span><span>Obtén tu beneficio — Al completar 10 compras recibes un 2% adicional en tu siguiente compra.</span></li>
+          <li><span class="num">5</span><span>Obtén tu beneficio — Después de completar 10 compras recibes un 2% adicional en tu siguiente compra.</span></li>
         </ol>
         <p class="nos-note" id="nos-club-cierre">Disfruta de nuestros productos naturales y acumula beneficios.</p>
         <div>
@@ -1280,7 +1324,7 @@ footer{background-color:var(--primary-dark);color:var(--white);padding:24px 0 40
 <script src="./app-5.js"></script>
 
 <!-- Script: Firebase + Lógica de negocio -->
-<script type="module" src="./app-6.js?v=whatsapp8-20261126"></script>
+<script type="module" src="./app-6.js?v=catalogo20261126"></script>
 
 <!-- ===== Pop-up de Bienvenida: Resumen de Beneficios ===== -->
 <style>
@@ -1326,7 +1370,7 @@ footer{background-color:var(--primary-dark);color:var(--white);padding:24px 0 40
       </div>
       <div class="wm-item">
         <div class="wm-ic"><i class="fas fa-gift"></i></div>
-        <div class="wm-tx"><b>Premio de fidelidad</b><small>2% de descuento adicional en tu 10.ª compra como cliente frecuente.</small></div>
+        <div class="wm-tx"><b>Premio de fidelidad</b><small>2% de descuento adicional en tu compra siguiente después de completar 10 compras.</small></div>
       </div>
       <div class="wm-item">
         <div class="wm-ic"><i class="fas fa-truck"></i></div>
@@ -1360,6 +1404,6 @@ footer{background-color:var(--primary-dark);color:var(--white);padding:24px 0 40
   <svg viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="#fff" stroke-width="1.6"/><path d="M3 10h18" stroke="#fff" stroke-width="1.6"/><circle cx="17" cy="14" r="1.4" fill="#c8963e"/></svg>
   Mi Tarjeta del Club
 </a>
-<p class="pg-version" style="text-align:center;font-size:11px;color:#52644f;padding:12px">Versión 2026-11-26 · WhatsApp de 8 dígitos · Tarjeta web del Club v1</p>
+<p class="pg-version" style="text-align:center;font-size:11px;color:#52644f;padding:12px">Versión 2026-11-27 · Catálogo con filtros v1 · WhatsApp de 8 dígitos</p>
 </body>
 </html>

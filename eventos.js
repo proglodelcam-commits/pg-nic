@@ -1,6 +1,6 @@
 (function(){
  'use strict';
- const allowed=new Set(['irAPedido','cliente','calc','copiarAliasACH','procesar','generarRecibo','toggleChatBot','evaluarTecla','enviarMensaje','closeReceipt','cerrarBienvenida','evaluarEnterAcceso','verMisSellosYEntrar','entrarComoInvitado','calcularTotales','procesarPagoWhatsApp','generarEImprimirRecibo','cerrarModalRecibo','carruselMove','carruselGo','add','removeItem','agregarAlCarrito','quitarDelCarrito']);
+ const allowed=new Set(['irAPedido','cliente','calc','copiarAliasACH','procesar','generarRecibo','toggleChatBot','evaluarTecla','enviarMensaje','closeReceipt','cerrarBienvenida','evaluarEnterAcceso','verMisSellosYEntrar','entrarComoInvitado','calcularTotales','procesarPagoWhatsApp','generarEImprimirRecibo','cerrarModalRecibo','carruselMove','carruselGo','add','removeItem','pgLimpiarFiltros','pgElegirCategoria','agregarAlCarrito','quitarDelCarrito']);
  function invoke(el,event){
   const code=el.getAttribute('data-pg-'+event.type)||'';
   if(code==='window.print()'){window.print();return;}
