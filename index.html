@@ -1406,5 +1406,19 @@ footer{background-color:var(--primary-dark);color:var(--white);padding:24px 0 40
   Mi Tarjeta del Club
 </a>
 <p class="pg-version" style="text-align:center;font-size:11px;color:#52644f;padding:12px">Versión 2026-11-27 · Catálogo con filtros v1 · WhatsApp de 8 dígitos</p>
+
+<!-- Ajuste visual: accesos flotantes y textos informativos -->
+<style id="pg-ajuste-visual">
+/* Fila de accesos por encima de la barra de instalación y del menú inferior. */
+#gw-btn{left:12px;right:auto;bottom:160px;transform:none;max-width:calc(100vw - 84px);box-sizing:border-box;font-size:12px;padding:10px 14px}
+#gw-btn:hover{transform:translateY(-2px)}
+#chatbot-launcher{right:12px;bottom:160px;width:48px;height:48px}
+#chatbot-launcher svg{width:30px;height:30px}
+/* Solo párrafos y listas informativas de los tres apartados solicitados. */
+#inicio .hero p,#inicio .about-card p,
+#nosotros p,#nosotros li,#asesoria p,#asesoria li{
+ text-align:justify;text-justify:inter-word;hyphens:auto;
+}
+</style>
 </body>
 </html>
