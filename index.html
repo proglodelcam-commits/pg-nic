@@ -1406,5 +1406,23 @@ footer{background-color:var(--primary-dark);color:var(--white);padding:24px 0 40
   Mi Tarjeta del Club
 </a>
 <p class="pg-version" style="text-align:center;font-size:11px;color:#52644f;padding:12px">Versión 2026-11-27 · Catálogo con filtros v1 · WhatsApp de 8 dígitos</p>
+
+<!-- Solo posición de las burbujas; textos y funciones originales intactos. -->
+<style id="pg-burbujas-posicion">
+#gw-btn{left:12px;right:auto;bottom:74px;transform:none;max-width:calc(100vw - 84px);box-sizing:border-box}
+#gw-btn:hover{transform:translateY(-2px)}
+#chatbot-launcher{right:12px;bottom:74px}
+/* Suben solo mientras está visible la barra de instalación. */
+body:has(#installBanner[style*="display: flex"]) #gw-btn,
+body:has(#installBanner[style*="display:flex"]) #gw-btn,
+body:has(#installBanner[style*="display: flex"]) #chatbot-launcher,
+body:has(#installBanner[style*="display:flex"]) #chatbot-launcher{bottom:118px}
+@media(max-width:359px){
+ body:has(#installBanner[style*="display: flex"]) #gw-btn,
+ body:has(#installBanner[style*="display:flex"]) #gw-btn,
+ body:has(#installBanner[style*="display: flex"]) #chatbot-launcher,
+ body:has(#installBanner[style*="display:flex"]) #chatbot-launcher{bottom:132px}
+}
+</style>
 </body>
 </html>
